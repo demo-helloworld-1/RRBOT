@@ -26,35 +26,33 @@ class MakeReservationDialog extends ComponentDialog{
 
         //Gather information from user.
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG,[
+            this.firstStep.bind(this),
+            this.getName.bind(this),// Get name from user
+            this.getNumberofParticipants.bind(this), // Number of participants for reservation
+            this.getDate.bind(this),//Date of reservation
+            this.getTime.bind(this),//Time of reservation
+            this.confirmStep.bind(this),//Show Summary of values entered by user and ask confirmation to make reservation
+            this.summaryStep.bind(this)
             
         ]));
 
-        this.firstStep.bind(this),//Ask confirmation if user wants to make reservations?
-        this.getName.bind(this),// Get name from user
-        this.getNumberofParticipants.bind(this), // Number of participants for reservation
-        this.getDate.bind(this),//Date of reservation
-        this.getTime.bind(this),//Time of reservation
-        this.confirmStep.bind(this),//Show Summary of values entered by user and ask confirmation to make reservation
-        this.summaryStep.bind(this)
-        this.initialDialogID = WATERFALL_DIALOG;
+        // this.firstStep.bind(this),//Ask confirmation if user wants to make reservations?
+            this.initialDialogId =  WATERFALL_DIALOG;
     }
 
     //To trigger this dialog from the main dialog (rrbot.js), main dialog will use a run helper function to access the componentDialog
     async run(turnContext, accessor){
+        // console.log("run method invoked");
+
         const dialogSet = new DialogSet(accessor);
         dialogSet.add(this);
         const dialogContext = await dialogSet.createContext(turnContext);
 
         const results = await dialogContext.continueDialog();
         if (results.status === DialogTurnStatus.empty){
-            await dialogContext.beginDialog(this.id)
+            console.log("Empty Status");
+            await dialogContext.beginDialog(this.id);
         }
-
-        // const results = await dialogContext.continueDialog();
-        // if (results.status === DialogTurnStatus.empty){
-        //     await dialogContext.beginDialog(this.id)
-        // }
-        
     }
 
     async firstStep(step) {

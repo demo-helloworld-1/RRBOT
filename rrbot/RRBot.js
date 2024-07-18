@@ -46,10 +46,10 @@ class RRBot extends ActivityHandler {
     }
 
     async dispatchToIntentAsync(context){
-        console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
+        // console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
         switch(context.activity.text){
             case 'Make Reservation':
-                console.log('Starting Reservation dialog')
+                // console.log('Starting Reservation dialog')
             await this.makeReservationDialog.run(context,this.dialogState);
             break;
 
@@ -59,10 +59,10 @@ class RRBot extends ActivityHandler {
             break;
         }
     }
-    onTurn(context, next) {
-        console.log('onTurn - received activity type:', context.activity.type);
-        return super.onTurn(context, next);
-    }
+    // onTurn(context, next) {
+    //     console.log('onTurn - received activity type:', context.activity.type);
+    //     return super.onTurn(context, next);
+    // }
 
 }
 
