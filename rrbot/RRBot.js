@@ -1,5 +1,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const {MakeReservationDialog} = require('./componentsDialogs/makeReservationDialog.js')
+
+
 class RRBot extends ActivityHandler {
     constructor(conversationState,userState) {
         super();
@@ -14,9 +16,7 @@ class RRBot extends ActivityHandler {
 
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            
-            await dispatchToIntentAsync(context);
-
+            await this.dispatchToIntentAsync(context);
             await next();
         });
 
@@ -46,20 +46,22 @@ class RRBot extends ActivityHandler {
     }
 
     async dispatchToIntentAsync(context){
-
+        console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
         switch(context.activity.text){
-            case "Make Reservation":
-                await this.makeReservationDialog.run(context,this.dialogState);
-                break;
+            case 'Make Reservation':
+                console.log('Starting Reservation dialog')
+            await this.makeReservationDialog.run(context,this.dialogState);
+            break;
 
 
             default: 
             console.log("Did not match Make Reservation Case");
             break;
         }
-
-
-
+    }
+    onTurn(context, next) {
+        console.log('onTurn - received activity type:', context.activity.type);
+        return super.onTurn(context, next);
     }
 
 }

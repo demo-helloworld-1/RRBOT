@@ -1,5 +1,5 @@
 //Defining Waterfall Dialog and Components using botbuilder-dialogs
-const {WaterfallDialog, ComponentsDialog}=require('botbuilder-dialogs');
+const {WaterfallDialog, ComponentDialog,DialogSet,DialogTurnStatus} = require('botbuilder-dialogs');
 
 //Defining different types of prompts that we are using in waterfall dialog
 const{ConfirmPrompt, ChoicePrompt, DateTimePrompt, NumberPrompt, TextPrompt}= require('botbuilder-dialogs');
@@ -13,7 +13,7 @@ const TEXT_PROMPT = 'TEXT_PROMPT';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
 //Here we create a class for make reservation using extension of Components Dialog
-class MakeReservationDialog extends ComponentsDialog{
+class MakeReservationDialog extends ComponentDialog{
     constructor(conversationState,userState){
         super('makeReservationDialog');//Dialog ID for class 
 
@@ -22,7 +22,7 @@ class MakeReservationDialog extends ComponentsDialog{
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
         this.addDialog(new NumberPrompt(NUMBER_PROMPT),this.noOfParticiapntsValidator);
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
-        this.addDialog(new DateTimePrompt(DATATIME_PROMPT));
+        this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
 
         //Gather information from user.
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG,[
@@ -56,8 +56,17 @@ class MakeReservationDialog extends ComponentsDialog{
         // }
         
     }
-    async firstStep(step){
-        return await step.prompt(CONFIRM_PROMPT,"Would you like to make a reservation>",['Yes','No']);
+
+    async firstStep(step) {
+        console.log("first step called")
+        try {
+            return await step.prompt(CONFIRM_PROMPT, "Would you like to make a reservation?", ['Yes', 'No']);
+        } catch (error) {
+            // Handle errors during the prompt 
+            console.error('Error in firstStep:', error);
+            await step.context.sendActivity("Oops, something went wrong. Please try again.");
+            return await step.endDialog(); 
+        }
     }
 
     async getName(step){
@@ -105,6 +114,8 @@ class MakeReservationDialog extends ComponentsDialog{
     async noOfParticiapntsValidator(promptContext){
         return promptContext.recognized.succeeded && promptContext.recognized.value >1 && promptContext.recognized.value <150;
     }
+    
+  
 }
 
 module.exports.MakeReservationDialog = MakeReservationDialog;
