@@ -14,7 +14,7 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
 //Here we create a class for make reservation using extension of Components Dialog
 class MakeReservationDialog extends ComponentsDialog{
-    constructor(){
+    constructor(conversationState,userState){
         super('makeReservationDialog');//Dialog ID for class 
 
         
@@ -105,7 +105,6 @@ class MakeReservationDialog extends ComponentsDialog{
     async noOfParticiapntsValidator(promptContext){
         return promptContext.recognized.succeeded && promptContext.recognized.value >1 && promptContext.recognized.value <150;
     }
-
 }
 
 module.exports.MakeReservationDialog = MakeReservationDialog;
