@@ -11,6 +11,7 @@ const DATETIME_PROMPT = 'DATETIME_PROMPT ';
 const NUMBER_PROMPT = 'NUMBER_PROMPT ';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
+var endDialog='';
 
 //Here we create a class for make reservation using extension of Components Dialog
 class MakeReservationDialog extends ComponentDialog{
@@ -56,6 +57,7 @@ class MakeReservationDialog extends ComponentDialog{
     }
 
     async firstStep(step) {
+        endDialog = false;
         console.log("first step called")
         try {
             return await step.prompt(CONFIRM_PROMPT, "Would you like to make a reservation?", ['Yes', 'No']);
@@ -93,7 +95,7 @@ class MakeReservationDialog extends ComponentDialog{
         step.values.time = step.result
 
         var msg = ` Here is the summary for your reservations: \n Name: ${step.values.name}\n Number of participants: ${step.values.noOfParticiapnts},\n
-        Date: ${step.values.date} \n Time: ${step.values.time}`
+        Date: ${JSON.stringify(step.values.date)} \n Time: ${JSON.stringify(step.values.time)}`
 
         await step.context.sendActivity(msg);
 
@@ -104,13 +106,17 @@ class MakeReservationDialog extends ComponentDialog{
         if(step.result===true){
             //Business Logic to create an reservation for Database
             await step.context.sendActivity("Reservation successfull made, Here is the confirmation with your reservation ID: 45678765")
-            
+            endDialog = true;
             return await step.endDialog();
         }
     }
 
     async noOfParticiapntsValidator(promptContext){
         return promptContext.recognized.succeeded && promptContext.recognized.value >1 && promptContext.recognized.value <150;
+    }
+
+    async isDialogComplete(){
+        return endDialog;
     }
     
   
