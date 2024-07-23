@@ -21,7 +21,7 @@ class MakeReservationDialog extends ComponentDialog{
         
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
-        this.addDialog(new NumberPrompt(NUMBER_PROMPT),this.noOfParticiapntsValidator);
+        this.addDialog(new NumberPrompt(NUMBER_PROMPT),this.noOfParticipantsValidator);
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
 
@@ -111,7 +111,7 @@ class MakeReservationDialog extends ComponentDialog{
         }
     }
 
-    async noOfParticiapntsValidator(promptContext){
+    async noOfParticipantsValidator(promptContext){
         return promptContext.recognized.succeeded && promptContext.recognized.value >1 && promptContext.recognized.value <150;
     }
 
