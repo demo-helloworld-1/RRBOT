@@ -94,8 +94,7 @@ class MakeReservationDialog extends ComponentDialog{
     async confirmStep(step){
         step.values.time = step.result
 
-        var msg = ` Here is the summary for your reservations: \n Name: ${step.values.name}\n Number of participants: ${step.values.noOfParticipants},\n
-        Date: ${JSON.stringify(step.values.date)} \n Time: ${JSON.stringify(step.values.time)}`
+        var msg = `Here is the summary for your reservations:  \nName: ${step.values.name}  \nNumber of participants: ${step.values.noOfParticipants}  \nDate: ${step.values.date[0].value}  \nTime: ${step.values.time[0].value}`;
 
         await step.context.sendActivity(msg);
 
