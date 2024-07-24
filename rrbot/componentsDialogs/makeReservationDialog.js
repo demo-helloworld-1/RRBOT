@@ -21,7 +21,7 @@ class MakeReservationDialog extends ComponentDialog{
         
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
-        this.addDialog(new NumberPrompt(NUMBER_PROMPT),this.noOfParticipantsValidator);
+        this.addDialog(new NumberPrompt(NUMBER_PROMPT,this.noOfParticipantsValidator));
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
 
@@ -82,7 +82,7 @@ class MakeReservationDialog extends ComponentDialog{
     }
 
     async getDate(step){
-        step.values.noOfParticiapnts = step.result
+        step.values.noOfParticipants = step.result
         return await step.prompt(DATETIME_PROMPT,'On which date you want to make the reservation?');
     }
 
@@ -94,7 +94,7 @@ class MakeReservationDialog extends ComponentDialog{
     async confirmStep(step){
         step.values.time = step.result
 
-        var msg = ` Here is the summary for your reservations: \n Name: ${step.values.name}\n Number of participants: ${step.values.noOfParticiapnts},\n
+        var msg = ` Here is the summary for your reservations: \n Name: ${step.values.name}\n Number of participants: ${step.values.noOfParticipants},\n
         Date: ${JSON.stringify(step.values.date)} \n Time: ${JSON.stringify(step.values.time)}`
 
         await step.context.sendActivity(msg);
@@ -112,7 +112,8 @@ class MakeReservationDialog extends ComponentDialog{
     }
 
     async noOfParticipantsValidator(promptContext){
-        return promptContext.recognized.succeeded && promptContext.recognized.value >1 && promptContext.recognized.value <150;
+        console.log("Validated")
+        return promptContext.recognized.succeeded && promptContext.recognized.value > 1 && promptContext.recognized.value < 150;
     }
 
     async isDialogComplete(){
