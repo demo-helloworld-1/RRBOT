@@ -4,6 +4,14 @@ const {WaterfallDialog, ComponentDialog,DialogSet,DialogTurnStatus} = require('b
 //Defining different types of prompts that we are using in waterfall dialog
 const{ConfirmPrompt, ChoicePrompt, DateTimePrompt, NumberPrompt, TextPrompt}= require('botbuilder-dialogs');
 
+const {CardFactory} = require('botbuilder');
+
+const CancelReservationAdaptiveCard = require('C:/Users/61082897/OneDrive - LTIMindtree/Documents/Interactive/RRBOT/rrbot/resources/adaptiveCards/cancelAdaptive.json')
+
+const CARDS = [
+    CancelReservationAdaptiveCard
+]
+
 //Dialog Set defining. 
 const CHOICE_PROMPT = 'CHOICE_PROMPT';
 const CONFIRM_PROMPT = 'CONFIRM_PROMPT';
@@ -14,24 +22,20 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 var endDialog='';
 
 //Here we create a class for make reservation using extension of Components Dialog
-class MakeReservationDialog extends ComponentDialog{
+class CancelReservationDialog extends ComponentDialog{
     constructor(conversationState,userState){
-        super('makeReservationDialog');//Dialog ID for class 
+        super('cancelReservationDialog');//Dialog ID for class 
 
         
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
-        this.addDialog(new NumberPrompt(NUMBER_PROMPT,this.noOfParticipantsValidator));
+        this.addDialog(new NumberPrompt(NUMBER_PROMPT));
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT));
 
         //Gather information from user.
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG,[
             this.firstStep.bind(this),
-            this.getName.bind(this),// Get name from user
-            this.getNumberofParticipants.bind(this), // Number of participants for reservation
-            this.getDate.bind(this),//Date of reservation
-            this.getTime.bind(this),//Time of reservation
             this.confirmStep.bind(this),//Show Summary of values entered by user and ask confirmation to make reservation
             this.summaryStep.bind(this)
             
@@ -59,67 +63,32 @@ class MakeReservationDialog extends ComponentDialog{
     async firstStep(step) {
         endDialog = false;
         console.log("first step called")
-        try {
-            return await step.prompt(CONFIRM_PROMPT, "Would you like to make a reservation?", ['Yes', 'No']);
-        } catch (error) {
-            // Handle errors during the prompt 
-            console.error('Error in firstStep:', error);
-            await step.context.sendActivity("Oops, something went wrong. Please try again.");
-            return await step.endDialog(); 
-        }
-    }
-
-    async getName(step){
-        
-        if(step.result === true){
-            return await step.prompt(TEXT_PROMPT,'In what name reservation is to be made?')
-        }
-        if(step.result === false){
-            await step.context.sendActivity("Would you like to something else?");
-            endDialog = true;
-            return await step.endDialog();
-
-        }
-    }
-
-    async getNumberofParticipants(step){
-        step.values.name = step.result
-        return await step.prompt(NUMBER_PROMPT,'How many participants(0-150)?');
-    }
-
-    async getDate(step){
-        step.values.noOfParticipants = step.result
-        return await step.prompt(DATETIME_PROMPT,'On which date you want to make the reservation?');
-    }
-
-    async getTime(step){
-        step.values.date = step.result
-        return await step.prompt (DATETIME_PROMPT, 'At what time?') 
+        await step.context.sendActivity({
+            attachments: [CardFactory.adaptiveCard(CARDS[0])]
+        })
+        await step.context.sendActivity('Enter the reservation Number for Cancellation: ');
+        return await step.prompt(TEXT_PROMPT,'')
     }
 
     async confirmStep(step){
-        step.values.time = step.result
+        step.values.reservationNumber = step.result
 
-        var msg = `Here is the summary for your reservations:  \nName: ${step.values.name}  \nNumber of participants: ${step.values.noOfParticipants}  \nDate: ${step.values.date[0].value}  \nTime: ${step.values.time[0].value}`;
+        var msg = `Here is your Reservation No that i have noted: ${step.values.reservationNumber}`;
 
         await step.context.sendActivity(msg);
 
-        return await step.prompt(CONFIRM_PROMPT,"Please confirm your details and want to make the reservation",['Yes','No']);
+        return await step.prompt(CONFIRM_PROMPT,"Please confirm your details and want to Cancel the reservation",['Yes','No']);
     }
 
     async summaryStep(step){
         if(step.result===true){
             //Business Logic to create an reservation for Database
-            await step.context.sendActivity("Reservation successfull made, Here is the confirmation with your reservation ID: 45678765")
+            await step.context.sendActivity("Reservation has cancelled. We miss you")
             endDialog = true;
             return await step.endDialog();
         }
     }
 
-    async noOfParticipantsValidator(promptContext){
-        console.log("Validated")
-        return promptContext.recognized.succeeded && promptContext.recognized.value > 1 && promptContext.recognized.value < 150;
-    }
 
     async isDialogComplete(){
         return endDialog;
@@ -128,7 +97,7 @@ class MakeReservationDialog extends ComponentDialog{
   
 }
 
-module.exports.MakeReservationDialog = MakeReservationDialog;
+module.exports.CancelReservationDialog = CancelReservationDialog;
 
 
 

@@ -1,0 +1,25 @@
+{
+    "type": "AdaptiveCard",
+    "version": "1.0",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "We feel very sad that you are canceling the reservation",
+            "size": "Medium",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Please confirm if you want to proceed with the cancellation."
+        },
+        {
+            "type": "Image",
+            "url": "https://tse2.mm.bing.net/th/id/OIP.5KTm4BQ-xQdh2lDRuiFQ_AHaF6?rs=1&pid=ImgDetMain",
+            "size": "Medium",
+            "altText": "Sorry, Image not Loaded",
+            "spacing": "Medium",
+            "horizontalAlignment": "Center"
+        }
+    ],
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+}
