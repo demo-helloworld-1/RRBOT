@@ -1,7 +1,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const {MakeReservationDialog} = require('./componentsDialogs/makeReservationDialog.js')
 const {CancelReservationDialog} = require('./componentsDialogs/cancelReservationDialog')
-
+const axios = require("axios")
 
 class RRBot extends ActivityHandler {
     constructor(conversationState,userState) {
@@ -23,7 +23,16 @@ class RRBot extends ActivityHandler {
 
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            await this.dispatchToIntentAsync(context);
+            // await this.dispatchToIntentAsync(context);
+            const CLUResult = await CLURecognizer(context._activity.text);
+
+            const intent = CLUResult.topIntent;
+            const entities = CLUResult.entities;
+
+            // console.log(CLUResult);
+
+            await this.dispatchToIntentAsync(context,intent,entities);
+
             await next();
         });
 
@@ -39,6 +48,59 @@ class RRBot extends ActivityHandler {
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
+        
+        //custom method to configure CLU
+        async function CLURecognizer(text) {
+        var data = JSON.stringify({
+        kind: "Conversation",
+        analysisInput: {
+            conversationItem: {
+              id: "1",
+              participantId: "1",
+              text: text,
+            },
+          },
+          parameters: {
+            projectName: "RRBOT",
+            verbose: true,
+            deploymentName: "RRBot_Deployement",
+            stringIndexType: "TextElement_V8",
+          },
+        });
+        var config = {
+          method: "post",
+          url: "https://msdkltimrrbot.cognitiveservices.azure.com/language/:analyze-conversations?api-version=2022-10-01-preview",
+          headers: {
+            "Ocp-Apim-Subscription-Key": "7642f1d0582f4c0caea3af01cc839e1e",
+            "Content-Type": "application/json",
+          },
+          data: data,
+        };
+        try {
+          let resultObj = {
+              topIntent : "",
+              entities : {},
+          }
+          const result = await axios(config);
+          console.log(result.data.result.prediction)
+        //   resultObj.topIntent = result.data.result.prediction.topIntent;
+        //   for (let i = 0; i < result.data.result.prediction.entities.length; i++) {
+        //       if(resultObj.entities.hasOwnProperty(result.data.result.prediction.entities[i].category)){
+        //           resultObj.entities[result.data.result.prediction.entities[i].category].push(result.data.result.prediction.entities[i].resolutions[0].value)
+        //       } else if(result.data.result.prediction.entities[i].category == "datetimeV2"){
+        //         resultObj.entities[result.data.result.prediction.entities[i].category] = []
+        //         resultObj.entities[result.data.result.prediction.entities[i].category].push(result.data.result.prediction.entities[i])
+        //       } else {
+        //           resultObj.entities[result.data.result.prediction.entities[i].category] = []
+        //           resultObj.entities[result.data.result.prediction.entities[i].category].push(result.data.result.prediction.entities[i].resolutions[0].value)
+        //       }
+        //   }
+        //   console.log(resultObj);
+          return resultObj;
+        } catch (error) {
+            console.log(error)
+        }
+      }
     }
 
     async sendWelcomeMessage(turnContext){
@@ -58,7 +120,7 @@ class RRBot extends ActivityHandler {
         await turnContext.sendActivity(reply);
     }
 
-    async dispatchToIntentAsync(context){
+    async dispatchToIntentAsync(context,intent,entities){
         // console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
         var currentIntent ='';
         const previousIntent = await this.previousIntent.get(context,{});
@@ -68,17 +130,17 @@ class RRBot extends ActivityHandler {
             currentIntent = previousIntent.intentName;
         }
         else if(previousIntent.intentName && conversationData.endDialog === true){
-            currentIntent = context.activity.text;
+            currentIntent = intent;
         }
         else{
-            currentIntent = context.activity.text;
-            await this.previousIntent.set(context,{intentName: context.activity.text});
+            currentIntent = intent;
+            await this.previousIntent.set(context,{intentName: intent});
         }
 
         switch(currentIntent){
 
 
-            case 'Make Reservation':
+            case 'Make_Reservation':
             console.log('Inside Make Reservation Case')
             await this.conversationData.set(context,{endDialog:false});
             await this.makeReservationDialog.run(context,this.dialogState);
@@ -89,7 +151,7 @@ class RRBot extends ActivityHandler {
             }
             break;
 
-            case 'Cancel Reservation':
+            case 'Cancel_Reservation':
             console.log('Inside Cancel Reservation Case')
             await this.conversationData.set(context,{endDialog:false});
             await this.cancelReservationDialog.run(context,this.dialogState);
