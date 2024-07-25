@@ -82,8 +82,8 @@ class RRBot extends ActivityHandler {
               entities : {},
           }
           const result = await axios(config);
-          console.log(result.data.result.prediction)
-        //   resultObj.topIntent = result.data.result.prediction.topIntent;
+          console.log(result)
+          resultObj.topIntent = result.data.result.prediction.topIntent;
         //   for (let i = 0; i < result.data.result.prediction.entities.length; i++) {
         //       if(resultObj.entities.hasOwnProperty(result.data.result.prediction.entities[i].category)){
         //           resultObj.entities[result.data.result.prediction.entities[i].category].push(result.data.result.prediction.entities[i].resolutions[0].value)
@@ -95,7 +95,7 @@ class RRBot extends ActivityHandler {
         //           resultObj.entities[result.data.result.prediction.entities[i].category].push(result.data.result.prediction.entities[i].resolutions[0].value)
         //       }
         //   }
-        //   console.log(resultObj);
+          console.log(resultObj);
           return resultObj;
         } catch (error) {
             console.log(error)
@@ -120,58 +120,109 @@ class RRBot extends ActivityHandler {
         await turnContext.sendActivity(reply);
     }
 
-    async dispatchToIntentAsync(context,intent,entities){
-        // console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
-        var currentIntent ='';
-        const previousIntent = await this.previousIntent.get(context,{});
-        const conversationData = await this.conversationData.get(context,{});
+    // async dispatchToIntentAsync(context,intent,entities){
+    //     // console.log('dispatchToIntentAsync - recieved Text:',context.activity.text);
+    //     var currentIntent ='';
+    //     const previousIntent = await this.previousIntent.get(context,{});
+    //     const conversationData = await this.conversationData.get(context,{});
 
+    //     if(previousIntent.intentName && conversationData.endDialog === false ){
+    //         currentIntent = previousIntent.intentName;
+    //     }
+    //     else if(previousIntent.intentName && conversationData.endDialog === true){
+    //         currentIntent = intent;
+    //     }
+    //     else{
+    //         currentIntent = intent;
+    //         await this.previousIntent.set(context,{intentName: intent});
+    //     }
+
+    //     switch(currentIntent){
+
+
+    //         case 'Make_Reservation':
+    //         console.log('Inside Make Reservation Case')
+    //         await this.conversationData.set(context,{endDialog:false});
+    //         await this.makeReservationDialog.run(context,this.dialogState);
+    //         conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
+    //         if(conversationData.endDialog){
+    //             await this.previousIntent.set(context,{intentName: null});
+    //             await this.sendSuggestedActions(context);
+    //         }
+    //         break;
+
+    //         case 'Cancel_Reservation':
+    //         console.log('Inside Cancel Reservation Case')
+    //         await this.conversationData.set(context,{endDialog:false});
+    //         await this.cancelReservationDialog.run(context,this.dialogState);
+    //         conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
+    //         if(conversationData.endDialog){
+    //             await this.previousIntent.set(context,{intentName: null});
+    //             await this.sendSuggestedActions(context);
+    //         }
+    //         break;
+
+    //         default: 
+    //         console.log("Did not match Make Reservation Case");
+    //         break;
+    //     }
+        
+    // }
+    // onTurn(context, next) {
+    //     console.log('onTurn - received activity type:', context.activity.type);
+    //     return super.onTurn(context, next);
+    // }
+
+
+    //New line of Copy paste code
+    async dispatchToIntentAsync(context,intent, entities,qnaResult){
+ 
+        var currentIntent = '';
+        const previousIntent = await this.previousIntent.get(context,{});
+        const conversationData = await this.conversationData.get(context,{});  
+ 
         if(previousIntent.intentName && conversationData.endDialog === false ){
-            currentIntent = previousIntent.intentName;
-        }
-        else if(previousIntent.intentName && conversationData.endDialog === true){
-            currentIntent = intent;
+           currentIntent = previousIntent.intentName;
+        }else if (previousIntent.intentName && conversationData.endDialog === true){
+             currentIntent = intent;
+        // }else if(intent === "None" && !previousIntent.intentName){
+        //     console.log('Inside the Qna Elseif')
+        //     await context.sendActivity(`${qnaResult.answers[0].answer}`);
+        //     await this.sendSuggestedActions(context);
         }
         else{
             currentIntent = intent;
             await this.previousIntent.set(context,{intentName: intent});
         }
-
         switch(currentIntent){
-
-
-            case 'Make_Reservation':
-            console.log('Inside Make Reservation Case')
-            await this.conversationData.set(context,{endDialog:false});
-            await this.makeReservationDialog.run(context,this.dialogState);
-            conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
-            if(conversationData.endDialog){
-                await this.previousIntent.set(context,{intentName: null});
-                await this.sendSuggestedActions(context);
-            }
+ 
+            case 'Make Reservation':
+                console.log("Inside Make Reservation Case");
+                await this.conversationData.set(context,{endDialog: false});
+                await this.makeReservationDialog.run(context,this.dialogState,entities);
+                conversationData.endDialog = await this.makeReservationDialog.isDialogComplete();
+                if(conversationData.endDialog){
+                    await this.previousIntent.set(context,{intentName: null});
+                    await this.sendSuggestedActions(context);
+                }
             break;
-
-            case 'Cancel_Reservation':
-            console.log('Inside Cancel Reservation Case')
-            await this.conversationData.set(context,{endDialog:false});
-            await this.cancelReservationDialog.run(context,this.dialogState);
-            conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
-            if(conversationData.endDialog){
-                await this.previousIntent.set(context,{intentName: null});
-                await this.sendSuggestedActions(context);
-            }
+ 
+            case 'Cancel Reservation':
+                console.log("Inside Cancel Reservation Case");
+                await this.conversationData.set(context,{endDialog: false});
+                await this.cancelReservationDialog.run(context,this.dialogState);
+                conversationData.endDialog = await this.cancelReservationDialog.isDialogComplete();
+                if(conversationData.endDialog){
+                    await this.previousIntent.set(context,{intentName: null});
+                    await this.sendSuggestedActions(context);
+                }
             break;
-
-            default: 
-            console.log("Did not match Make Reservation Case");
-            break;
+ 
+            default:
+                console.log("Did not match any case");
+                break;
         }
-        
     }
-    // onTurn(context, next) {
-    //     console.log('onTurn - received activity type:', context.activity.type);
-    //     return super.onTurn(context, next);
-    // }
 
 }
 
